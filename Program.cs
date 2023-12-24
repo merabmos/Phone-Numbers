@@ -8,8 +8,6 @@ public class ReverseRoot
 {
     private static void Main()
     {
-
-
         List<string> phoneNumbers;
         List<string[]> words = Words(out phoneNumbers);
         CheckNumbers(words, phoneNumbers);
@@ -31,33 +29,55 @@ public class ReverseRoot
 
             if (i == 1)
             {
-                if (text.Length > 100)
-                    throw new Exception("Out of max count");
-                phoneNumbers.Add(text);
+                try
+                {
+                    if (text.Length > 100)
+                        throw new Exception("Out of max count");
+                    phoneNumbers.Add(text);
+                }
+                catch
+                {
+                    i = 0;
+                }
 
             }
             else if (i == 2)
             {
-                var lmtOfWords = int.Parse(text);
+                try
+                {
+                    var lmtOfWords = int.Parse(text);
 
-                if (lmtOfWords > 50000)
-                    throw new Exception("Out of max number");
+                    if (lmtOfWords > 50000)
+                        throw new Exception("Out of max number");
 
-                words = new string[lmtOfWords];
-                limit += lmtOfWords;
+                    words = new string[lmtOfWords];
+                    limit += lmtOfWords;
+                }
+                catch
+                {
+                    i = 1;
+                }
             }
             else
             {
-                if (text.Length > 50)
-                    throw new Exception("Out of max count");
-
-                words[i - 3] = text.ToLower();
-
-                if (i == limit)
+                try
                 {
-                    w.Add(words);
-                    i = 0;
-                    limit = 2;
+
+                    if (text.Length > 50)
+                        throw new Exception("Out of max count");
+
+                    words[i - 3] = text.ToLower();
+
+                    if (i == limit)
+                    {
+                        w.Add(words);
+                        i = 0;
+                        limit = 2;
+                    }
+                }
+                catch
+                {
+                    i--;
                 }
             }
         }
@@ -67,9 +87,6 @@ public class ReverseRoot
 
     public static void CheckNumbers(List<string[]> words, List<string> phoneNumbers)
     {
-        //Sit
-        //yva
-        //552123
 
         Dictionary<int, string> numbDict = new Dictionary<int, string>()
             { {1,"ij" },{2,"abc" },{3,"def" },
@@ -77,49 +94,42 @@ public class ReverseRoot
               {7,"prs" },{8,"tuv" },{9,"wxy" },
                          {0,"oqz" }};
 
-        StringBuilder shedgeniliSityva = new StringBuilder(" ");
         for (int i = 0; i < words.Count; i++)
         {
-            var mopovebuli = shedgeniliSityva.ToString().Trim();
-            int mopovebuliLenght = mopovebuli.Length;
-
             int firstLetter = phoneNumbers[i][0] - '0';
-            var filtredNumbers = words[i].Where(word => word.Length <= phoneNumbers[i].Length)
-                                      .Where(word => !(word.Length == phoneNumbers[i].Length && !numbDict.GetValueOrDefault(firstLetter).Contains(word[0])));
+            var filtredWords = words[i].Where(word => word.Length <= phoneNumbers[i].Length)
+                                         .Where(word => !(word.Length == phoneNumbers[i].Length && !numbDict.GetValueOrDefault(firstLetter)
+                                         .Contains(word[0])));
 
-            for (int j = 0; j < filtredNumbers.Count(); j++)
+            string word = "";
+            for (int j = 0; j < phoneNumbers[i].Length; j++)
             {
-                var word = filtredNumbers.ElementAt(j);
-                bool usableWord = true;
-                for (int w = 0; w < word.Length; w++)
+                int nNumber = phoneNumbers[i][j] - '0';
+                var trimmed = word.Replace(" ", "");
+                int trimmedLength = trimmed.Length;
+                if (trimmedLength > 0 && j < trimmedLength)
                 {
-                    var exist = numbDict.GetValueOrDefault(phoneNumbers[i][mopovebuliLenght >= 0 ? mopovebuliLenght : w] - '0').Contains(word[w]);
-
-                    if (!exist)
-                    {
-                        usableWord = false;
-                        break;
-                    }
-                    mopovebuliLenght++;
+                    if (!numbDict.GetValueOrDefault(nNumber).Contains(trimmed[j]))
+                        word = "";
                 }
-
-                if (usableWord)
-                    shedgeniliSityva.Append(word + " ");
-            }
-
-            if (mopovebuliLenght != phoneNumbers[i].Length)
-            {
-                if(mopovebuliLenght > 0)
-                    i = 0;
                 else
-                    Console.WriteLine("No solution.");
-            }
-            else
-            {
-                Console.WriteLine(shedgeniliSityva.ToString().Trim());
-                shedgeniliSityva.Clear();
+                {
+                    var filtredWordByFirstLetter = filtredWords.FirstOrDefault(o => numbDict.GetValueOrDefault(nNumber).Contains(o[0]) && o.Length == phoneNumbers[i].Length);
+
+                    if (filtredWordByFirstLetter != null)
+                        word += filtredWordByFirstLetter + " ";
+                    else
+                    {
+                        filtredWordByFirstLetter = filtredWords.FirstOrDefault(o => numbDict.GetValueOrDefault(nNumber).Contains(o[0]));
+                        if (filtredWordByFirstLetter != null)
+                            word += filtredWordByFirstLetter + " ";
+                        else
+                            break;
+                    }
+                }
             }
 
+            Console.WriteLine(string.IsNullOrEmpty(word) || word.Replace(" ", "").Length != phoneNumbers[i].Length ? "No solution." : word);
         }
     }
 }
