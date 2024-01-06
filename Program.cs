@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,10 +9,13 @@ public class ReverseRoot
 {
     private static void Main()
     {
-        List<string> phoneNumbers;
-        List<string[]> words = Words(out phoneNumbers);
-        CheckNumbers(words, phoneNumbers);
+        /*        List<string> phoneNumbers;
+                List<string[]> words = Words(out phoneNumbers);
+                CheckNumbers(words, phoneNumbers);*/
+
+        Method();
     }
+
 
 
     public static List<string[]> Words(out List<string> phoneNumbers)
@@ -93,43 +97,46 @@ public class ReverseRoot
               {4,"gh" },{5,"kl" },{6,"mn" },
               {7,"prs" },{8,"tuv" },{9,"wxy" },
                          {0,"oqz" }};
-
-        for (int i = 0; i < words.Count; i++)
-        {
-            int firstLetter = phoneNumbers[i][0] - '0';
-            var filtredWords = words[i].Where(word => word.Length <= phoneNumbers[i].Length)
-                                         .Where(word => !(word.Length == phoneNumbers[i].Length && !numbDict.GetValueOrDefault(firstLetter)
-                                         .Contains(word[0])));
-
-            string word = "";
-            for (int j = 0; j < phoneNumbers[i].Length; j++)
-            {
-                int nNumber = phoneNumbers[i][j] - '0';
-                var trimmed = word.Replace(" ", "");
-                int trimmedLength = trimmed.Length;
-                if (trimmedLength > 0 && j < trimmedLength)
-                {
-                    if (!numbDict.GetValueOrDefault(nNumber).Contains(trimmed[j]))
-                        word = "";
-                }
-                else
-                {
-                    var filtredWordByFirstLetter = filtredWords.FirstOrDefault(o => numbDict.GetValueOrDefault(nNumber).Contains(o[0]) && o.Length == phoneNumbers[i].Length);
-
-                    if (filtredWordByFirstLetter != null)
-                        word += filtredWordByFirstLetter + " ";
-                    else
-                    {
-                        filtredWordByFirstLetter = filtredWords.FirstOrDefault(o => numbDict.GetValueOrDefault(nNumber).Contains(o[0]));
-                        if (filtredWordByFirstLetter != null)
-                            word += filtredWordByFirstLetter + " ";
-                        else
-                            break;
-                    }
-                }
-            }
-
-            Console.WriteLine(string.IsNullOrEmpty(word) || word.Replace(" ", "").Length != phoneNumbers[i].Length ? "No solution." : word);
-        }
     }
+
+
+    public static void Method()
+    {
+        string number = "7325189087";
+
+        List<string> words = new List<string>() { "it", "your", "reality", "real", "our" };
+
+        SortByLenght(words);
+
+        Console.WriteLine(CheckWord(words[2], number));
+    }
+    public static bool CheckWord(string word, string number)
+    {
+        Dictionary<int, string> numbDict = new Dictionary<int, string>()
+            { {1,"ij" },{2,"abc" },{3,"def" },
+              {4,"gh" },{5,"kl" },{6,"mn" },
+              {7,"prs" },{8,"tuv" },{9,"wxy" },
+                         {0,"oqz" }};
+
+        if (word.Length > number.Length)
+            return false;
+
+        for (int i = 0; i < word.Length; i++)
+        {
+            string val;
+
+            numbDict.TryGetValue(number[i] - '0', out val);
+
+            if (!val.Contains(word[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    public static void SortByLenght(List<string> words)
+    {
+        words.Sort((x, y) => y.Length.CompareTo(x.Length));
+    }
+
 }
