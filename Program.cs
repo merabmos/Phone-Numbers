@@ -4,112 +4,193 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 public class ReverseRoot
 {
     private static void Main()
     {
-        /*        List<string> phoneNumbers;
-                List<string[]> words = Words(out phoneNumbers);
-                CheckNumbers(words, phoneNumbers);*/
+        /*
+        List<string> phoneNumbers = new List<string>() { "7325189087", "4294967296" };
 
-        Method();
+
+        List<List<string>> words = new List<List<string>>()
+        {
+            new List<string>()
+            {
+                "it", "your", "reality", "real", "our"
+            },
+            new List<string>()
+            {
+                "it", "your", "reality", "real", "our"
+            }
+        };
+*/
+        List<string> phoneNumbers = new List<string>();
+        List<List<string>> words = new List<List<string>>();
+
+        Input();
+        CheckNumbers(words, phoneNumbers);
     }
 
-
-
-    public static List<string[]> Words(out List<string> phoneNumbers)
+    public static void Input()
     {
-        phoneNumbers = new List<string>();
-        int limit = 2;
-        string[] words = default;
-        List<string[]> w = new List<string[]>();
-        for (int i = 1; i <= limit; i++)
+        InputPhoneNumber();
+        int totalNumber = InputWordsTotalNumber();
+        InputWords(totalNumber);
+    }
+
+    public static string InputPhoneNumber()
+    {
+        while (true)
         {
-            var text = Console.ReadLine();
+            var number = Console.ReadLine();
+            var regex = new Regex("^[0-9]+$");
 
-            if (text == "-1")
-                break;
-
-            if (i == 1)
+            if (number.Length > 100)
             {
-                try
-                {
-                    if (text.Length > 100)
-                        throw new Exception("Out of max count");
-                    phoneNumbers.Add(text);
-                }
-                catch
-                {
-                    i = 0;
-                }
-
+                Console.WriteLine("Phone number length must be lower than 100.");
+                Console.WriteLine("Try Again :");
             }
-            else if (i == 2)
+            else if (!regex.Match(number).Success)
             {
-                try
-                {
-                    var lmtOfWords = int.Parse(text);
+                Console.WriteLine("Please enter only numbers.");
+                Console.WriteLine("Try Again :");
+            }
+            else
+                return number;
+        }
+    }
+    public static int InputWordsTotalNumber()
+    {
+        while (true)
+        {
+            var number = Console.ReadLine();
+            var regex = new Regex("^[0-9]+$");
 
-                    if (lmtOfWords > 50000)
-                        throw new Exception("Out of max number");
-
-                    words = new string[lmtOfWords];
-                    limit += lmtOfWords;
-                }
-                catch
-                {
-                    i = 1;
-                }
+            if (!regex.Match(number).Success)
+            {
+                Console.WriteLine("Please enter only number.");
+                Console.WriteLine("Try Again :");
             }
             else
             {
-                try
+                var parsedNumber = int.Parse(number);
+
+                if (parsedNumber > 50000 && parsedNumber < 1)
                 {
-
-                    if (text.Length > 50)
-                        throw new Exception("Out of max count");
-
-                    words[i - 3] = text.ToLower();
-
-                    if (i == limit)
-                    {
-                        w.Add(words);
-                        i = 0;
-                        limit = 2;
-                    }
+                    Console.WriteLine("Number must be lower than 50000 and higher than 0");
+                    Console.WriteLine("Try Again :");
                 }
-                catch
-                {
-                    i--;
-                }
+                else
+                    return parsedNumber;
             }
+
+        }
+    }
+    public static List<string> InputWords(int wordsTotalNumber)
+    {
+        List<string> words = new List<string>();
+
+        while (true)
+        {
+            if (wordsTotalNumber == words.Count)
+                return words;
+
+            var word = Console.ReadLine();
+            var regex = new Regex("^[a-z]+$");
+
+            if (word.Length > 50)
+            {
+                Console.WriteLine("Word length must be lower than 50.");
+                Console.WriteLine("Try Again :");
+            }
+            else if (!regex.Match(word).Success)
+            {
+                Console.WriteLine("Please enter only letters.");
+                Console.WriteLine("Try Again :");
+            }
+            else
+                words.Add(word);
+        }
+    }
+
+/*    public static bool Call()
+    {
+        Console.ReadLine();
+
+    }*/
+
+    public static void OutPut(List<string> searchedWords)
+    {
+        if (searchedWords != null)
+        {
+            Console.WriteLine(string.Join(" ", searchedWords));
+        }
+        else
+        {
+            Console.WriteLine("No solution.");
+        }
+    }
+    public static void CheckNumbers(List<List<string>> words, List<string> phoneNumbers)
+    {
+        for (int i = 0; i < phoneNumbers.Count; i++)
+        {
+            SortByLenght(words[i]);
+            var searchedWords = SearchingWords(words[i], phoneNumbers[i]);
+            OutPut(searchedWords);
+        }
+    }
+
+    public static List<string> SearchingWords(List<string> words, string number)
+    {
+        bool finded = false;
+
+        List<string> collectedWords = new List<string>();
+
+        while (!finded)
+        {
+            var collected = CollectWords(words, number);
+
+            if (collected.Count == 0)
+                return null;
+
+            collectedWords.AddRange(collected);
+
+            int colletedWordsLength = string.Join("", collectedWords).Length;
+
+            if (colletedWordsLength != number.Length && colletedWordsLength > 0)
+            {
+                words.RemoveAll(w => collectedWords.Exists(ob => ob.Equals(w)));
+                number = number.Substring(colletedWordsLength);
+            }
+            else
+                finded = true;
         }
 
-        return w;
+        return collectedWords;
     }
 
-    public static void CheckNumbers(List<string[]> words, List<string> phoneNumbers)
+    public static List<string> CollectWords(List<string> words, string number)
     {
+        List<string> collectedWords = new List<string>();
 
-        Dictionary<int, string> numbDict = new Dictionary<int, string>()
-            { {1,"ij" },{2,"abc" },{3,"def" },
-              {4,"gh" },{5,"kl" },{6,"mn" },
-              {7,"prs" },{8,"tuv" },{9,"wxy" },
-                         {0,"oqz" }};
+        foreach (var word in words)
+            if (CheckWord(word, number))
+            {
+                int numberLength = number.Length;
+
+                collectedWords.Add(word);
+
+                if (word.Length == numberLength)
+                    return collectedWords;
+
+                number = number.Substring(word.Length);
+            }
+
+        return collectedWords;
     }
 
-
-    public static void Method()
-    {
-        string number = "7325189087";
-
-        List<string> words = new List<string>() { "it", "your", "reality", "real", "our" };
-
-        SortByLenght(words);
-
-        Console.WriteLine(CheckWord(words[2], number));
-    }
     public static bool CheckWord(string word, string number)
     {
         Dictionary<int, string> numbDict = new Dictionary<int, string>()
