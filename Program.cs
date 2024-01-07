@@ -10,34 +10,35 @@ public class ReverseRoot
 {
     private static void Main()
     {
-        /*
-        List<string> phoneNumbers = new List<string>() { "7325189087", "4294967296" };
 
+        List<string> phoneNumbers;
 
-        List<List<string>> words = new List<List<string>>()
-        {
-            new List<string>()
-            {
-                "it", "your", "reality", "real", "our"
-            },
-            new List<string>()
-            {
-                "it", "your", "reality", "real", "our"
-            }
-        };
-*/
-        List<string> phoneNumbers = new List<string>();
-        List<List<string>> words = new List<List<string>>();
+        List<List<string>> words;
 
-        Input();
+        words = Input(out phoneNumbers);
+
         CheckNumbers(words, phoneNumbers);
     }
 
-    public static void Input()
+    public static List<List<string>> Input(out List<string> phoneNumbers)
     {
-        InputPhoneNumber();
-        int totalNumber = InputWordsTotalNumber();
-        InputWords(totalNumber);
+        List<List<string>> words = new List<List<string>>() { };
+        phoneNumbers = new List<string>();
+
+        while (true)
+        {
+            var number = InputPhoneNumber();
+            if (number != "-1")
+            {
+                phoneNumbers.Add(number);
+                
+                int totalWordsNumber = InputWordsTotalNumber();
+
+                words.Add(InputWords(totalWordsNumber));
+            }
+            else
+                return words;
+        }
     }
 
     public static string InputPhoneNumber()
@@ -47,7 +48,11 @@ public class ReverseRoot
             var number = Console.ReadLine();
             var regex = new Regex("^[0-9]+$");
 
-            if (number.Length > 100)
+            if (number == "-1")
+            {
+                return number;
+            }
+            else if (number.Length > 100) 
             {
                 Console.WriteLine("Phone number length must be lower than 100.");
                 Console.WriteLine("Try Again :");
@@ -114,13 +119,6 @@ public class ReverseRoot
                 words.Add(word);
         }
     }
-
-/*    public static bool Call()
-    {
-        Console.ReadLine();
-
-    }*/
-
     public static void OutPut(List<string> searchedWords)
     {
         if (searchedWords != null)
@@ -157,13 +155,10 @@ public class ReverseRoot
 
             collectedWords.AddRange(collected);
 
-            int colletedWordsLength = string.Join("", collectedWords).Length;
+            int colletedLength = string.Join("", collected).Length;
 
-            if (colletedWordsLength != number.Length && colletedWordsLength > 0)
-            {
-                words.RemoveAll(w => collectedWords.Exists(ob => ob.Equals(w)));
-                number = number.Substring(colletedWordsLength);
-            }
+            if (colletedLength != number.Length && colletedLength > 0)
+                number = number.Substring(colletedLength);
             else
                 finded = true;
         }
@@ -176,6 +171,7 @@ public class ReverseRoot
         List<string> collectedWords = new List<string>();
 
         foreach (var word in words)
+        {
             if (CheckWord(word, number))
             {
                 int numberLength = number.Length;
@@ -187,6 +183,7 @@ public class ReverseRoot
 
                 number = number.Substring(word.Length);
             }
+        }
 
         return collectedWords;
     }
