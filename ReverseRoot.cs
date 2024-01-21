@@ -46,22 +46,21 @@ namespace ReverseRoot
         {
             while (true)
             {
-                var number = Console.ReadLine();
+                var number = Console.ReadLine().Trim();
                 var regex = new Regex("^[0-9]+$");
 
                 if (number == "-1")
                 {
                     return number;
                 }
-                else if (number.Length > 100)
+                else if (number.Length >= 100)
                 {
-                    Console.WriteLine("Phone number length must be lower than 100.");
-                    Console.WriteLine("Try Again :");
+                    continue;
+
                 }
                 else if (!regex.Match(number).Success)
                 {
-                    Console.WriteLine("Please enter only numbers.");
-                    Console.WriteLine("Try Again :");
+                    continue;
                 }
                 else
                     return number;
@@ -71,22 +70,20 @@ namespace ReverseRoot
         {
             while (true)
             {
-                var number = Console.ReadLine();
+                var number = Console.ReadLine().Trim();
                 var regex = new Regex("^[0-9]+$");
 
                 if (!regex.Match(number).Success)
                 {
-                    Console.WriteLine("Please enter only number.");
-                    Console.WriteLine("Try Again :");
+                    continue;
                 }
                 else
                 {
                     var parsedNumber = int.Parse(number);
 
-                    if (parsedNumber > 50000 && parsedNumber < 1)
+                    if (parsedNumber >= 50000 && parsedNumber < 1)
                     {
-                        Console.WriteLine("Number must be lower than 50000 and higher than 0");
-                        Console.WriteLine("Try Again :");
+                        continue;
                     }
                     else
                         return parsedNumber;
@@ -103,18 +100,16 @@ namespace ReverseRoot
                 if (wordsTotalNumber == words.Count)
                     return words;
 
-                var word = Console.ReadLine();
+                var word = Console.ReadLine().ToLower().Trim();
                 var regex = new Regex("^[a-z]+$");
 
-                if (word.Length > 50)
+                if (word.Length >= 50)
                 {
-                    Console.WriteLine("Word length must be lower than 50.");
-                    Console.WriteLine("Try Again :");
+                    continue;
                 }
                 else if (!regex.Match(word).Success)
                 {
-                    Console.WriteLine("Please enter only letters.");
-                    Console.WriteLine("Try Again :");
+                    continue;
                 }
                 else
                     words.Add(word);
@@ -167,30 +162,60 @@ namespace ReverseRoot
             return collectedWords;
         }
 
-        public static List<string> CollectingWords(List<string> words, string number)
+        public static List<string> CollectingWords(List<string> words, string number, bool abbreviated = false, List<string> collectedWords = null)
         {
-            List<string> collectedWords = new List<string>();
+            if (collectedWords == null)
+                collectedWords = new List<string>();
 
             for (int i = 0; i < words.Count; i++)
             {
                 var word = words[i];
+
                 if (CheckWord(word, number))
                 {
                     i = -1;
-                    int numberLength = number.Length;
 
-                    collectedWords.Add(word);
+                    int numberLength = number.Length;
+                    if (abbreviated)
+                        collectedWords[collectedWords.Count - 1] += word;
+                    else
+                        collectedWords.Add(word);
 
                     if (word.Length == numberLength)
                         return collectedWords;
 
                     number = number.Substring(word.Length);
                 }
+
+                if (i == words.Count - 1)
+                {
+                    if (collectedWords.Count > 0)
+                    {
+                        var abbreviatedWords = words.Select(word =>
+                        {
+                            if (word.Length > number.Length)
+                            {
+                                var wordL = word.Length - number.Length;
+                                word = word.Substring(wordL);
+                            }
+                            return word;
+                        }).ToList();
+
+                        CollectingWords(abbreviatedWords, number, true, collectedWords);
+                    }
+                }
             }
 
             return collectedWords;
         }
-
+        /*
+        43550 // hello
+        3
+        hell
+        he
+        llo
+        -1 
+         */
         public static bool CheckWord(string word, string number)
         {
             Dictionary<int, string> numbDict = new Dictionary<int, string>()
@@ -198,7 +223,6 @@ namespace ReverseRoot
               {4,"gh" },{5,"kl" },{6,"mn" },
               {7,"prs" },{8,"tuv" },{9,"wxy" },
                          {0,"oqz" }};
-
             if (word.Length > number.Length)
                 return false;
 
