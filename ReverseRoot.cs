@@ -20,7 +20,125 @@ namespace ReverseRoot
 
             CheckNumbers(words, phoneNumbers);
         }
+        public static void CheckNumbers(List<List<string>> words, List<string> phoneNumbers)
+        {
+            for (int i = 0; i < phoneNumbers.Count; i++)
+            {
+                SortByLenght(words[i]);
+                var searchedWords = SearchingWords(words[i], phoneNumbers[i]);
+                OutPut(searchedWords);
+            }
+        }
+        public static List<string> SearchingWords(List<string> words, string number)
+        {
+            bool finded = false;
 
+            List<string> collectedWords = new List<string>();
+            while (!finded)
+            {
+                bool shorted = false;
+                var collected = CollectingWords(words, number);
+
+                if (collected.Count == 0)
+                {
+                    bool changed = false;
+                    if (collectedWords.Count > 0)
+                        words = words.Select(word =>
+                        {
+                            if (word.Length > number.Length)
+                            {
+                                 //Shorting words
+                                var wordL = word.Length - number.Length;
+                                word = word.Substring(wordL);
+                                changed = true;
+                                shorted = true;
+                            }
+                            return word;
+                        }).ToList();
+              
+                    if (!changed)
+                        return null;
+                }
+
+                //If words are shorted 
+                if (shorted)
+                    collected.ForEach(o =>
+                    {
+                        collectedWords[collectedWords.Count - 1] += o;
+                    });
+                else
+                    collectedWords.AddRange(collected);
+
+                int colletedLength = string.Join("", collected).Length;
+
+                if (colletedLength != number.Length && colletedLength > 0)
+                    number = number.Substring(colletedLength);
+                else
+                    if (colletedLength == number.Length)
+                    finded = true;
+            }
+
+            return collectedWords;
+        }
+        public static List<string> CollectingWords(List<string> words, string number)
+        {
+            List<string> collectedWords = new List<string>();
+
+            for (int i = 0; i < words.Count; i++)
+            {
+                var word = words[i];
+
+                if (CheckWord(word, number))
+                {
+                    i = -1;
+
+                    int numberLength = number.Length;
+
+                    collectedWords.Add(word);
+
+                    if (word.Length == numberLength)
+                        return collectedWords;
+
+                    number = number.Substring(word.Length);
+                }
+            }
+
+            return collectedWords;
+        }
+        /*
+        43550 
+        3
+        hell
+        he
+        llo
+        -1 
+         */
+        public static bool CheckWord(string word, string number)
+        {
+            Dictionary<int, string> numbDict = new Dictionary<int, string>()
+            { {1,"ij" },{2,"abc" },{3,"def" },
+              {4,"gh" },{5,"kl" },{6,"mn" },
+              {7,"prs" },{8,"tuv" },{9,"wxy" },
+                         {0,"oqz" }};
+            if (word.Length > number.Length)
+                return false;
+
+            for (int i = 0; i < word.Length; i++)
+            {
+                string val;
+
+                numbDict.TryGetValue(number[i] - '0', out val);
+
+                if (!val.Contains(word[i]))
+                    return false;
+            }
+
+            return true;
+        }
+        public static void SortByLenght(List<string> words)
+        {
+            words.Sort((x, y) => y.Length.CompareTo(x.Length));
+        }
         public static List<List<string>> Input(out List<string> phoneNumbers)
         {
             List<List<string>> words = new List<List<string>>() { };
@@ -41,7 +159,6 @@ namespace ReverseRoot
                     return words;
             }
         }
-
         public static string InputPhoneNumber()
         {
             while (true)
@@ -126,101 +243,5 @@ namespace ReverseRoot
                 Console.WriteLine("No solution.");
             }
         }
-        public static void CheckNumbers(List<List<string>> words, List<string> phoneNumbers)
-        {
-            for (int i = 0; i < phoneNumbers.Count; i++)
-            {
-                SortByLenght(words[i]);
-                var searchedWords = SearchingWords(words[i], phoneNumbers[i]);
-                OutPut(searchedWords);
-            }
-        }
-
-        public static List<string> SearchingWords(List<string> words, string number)
-        {
-            bool finded = false;
-
-            List<string> collectedWords = new List<string>();
-
-            while (!finded)
-            {
-                var collected = CollectingWords(words, number);
-
-                if (collected.Count == 0)
-                    return null;
-
-                collectedWords.AddRange(collected);
-
-                int colletedLength = string.Join("", collected).Length;
-
-                if (colletedLength != number.Length && colletedLength > 0)
-                    number = number.Substring(colletedLength);
-                else
-                    finded = true;
-            }
-
-            return collectedWords;
-        }
-
-        public static List<string> CollectingWords(List<string> words, string number)
-        {
-            List<string> collectedWords = new List<string>();
-
-            for (int i = 0; i < words.Count; i++)
-            {
-                var word = words[i];
-
-                if (CheckWord(word, number))
-                {
-                    i = -1;
-
-                    int numberLength = number.Length;
-                    collectedWords.Add(word);
-
-                    if (word.Length == numberLength)
-                        return collectedWords;
-
-                    number = number.Substring(word.Length);
-                }
-            }
-
-            return collectedWords;
-        }
-        /*
-        43550 // hello
-        3
-        hell
-        he
-        llo
-        -1 
-         */
-        public static bool CheckWord(string word, string number)
-        {
-            Dictionary<int, string> numbDict = new Dictionary<int, string>()
-            { {1,"ij" },{2,"abc" },{3,"def" },
-              {4,"gh" },{5,"kl" },{6,"mn" },
-              {7,"prs" },{8,"tuv" },{9,"wxy" },
-                         {0,"oqz" }};
-            if (word.Length > number.Length)
-                return false;
-
-            for (int i = 0; i < word.Length; i++)
-            {
-                string val;
-
-                numbDict.TryGetValue(number[i] - '0', out val);
-
-                if (!val.Contains(word[i]))
-                    return false;
-            }
-
-            return true;
-        }
-
-        public static void SortByLenght(List<string> words)
-        {
-            words.Sort((x, y) => y.Length.CompareTo(x.Length));
-        }
-
     }
 }
