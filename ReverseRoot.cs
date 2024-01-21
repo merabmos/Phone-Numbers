@@ -162,10 +162,9 @@ namespace ReverseRoot
             return collectedWords;
         }
 
-        public static List<string> CollectingWords(List<string> words, string number, bool abbreviated = false, List<string> collectedWords = null)
+        public static List<string> CollectingWords(List<string> words, string number)
         {
-            if (collectedWords == null)
-                collectedWords = new List<string>();
+            List<string> collectedWords = new List<string>();
 
             for (int i = 0; i < words.Count; i++)
             {
@@ -176,33 +175,12 @@ namespace ReverseRoot
                     i = -1;
 
                     int numberLength = number.Length;
-                    if (abbreviated)
-                        collectedWords[collectedWords.Count - 1] += word;
-                    else
-                        collectedWords.Add(word);
+                    collectedWords.Add(word);
 
                     if (word.Length == numberLength)
                         return collectedWords;
 
                     number = number.Substring(word.Length);
-                }
-
-                if (i == words.Count - 1)
-                {
-                    if (collectedWords.Count > 0)
-                    {
-                        var abbreviatedWords = words.Select(word =>
-                        {
-                            if (word.Length > number.Length)
-                            {
-                                var wordL = word.Length - number.Length;
-                                word = word.Substring(wordL);
-                            }
-                            return word;
-                        }).ToList();
-
-                        CollectingWords(abbreviatedWords, number, true, collectedWords);
-                    }
                 }
             }
 
