@@ -5,9 +5,15 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Channels;
 
+
+
+// https://dotnetcoretutorials.com/knapsack-algorithm-in-c/
+// https://www.geeksforgeeks.org/trie-insert-and-search/
 namespace ReverseRoot
 {
+ 
     public class ReverseRoot
     {
         private static void Main()
@@ -25,94 +31,62 @@ namespace ReverseRoot
             for (int i = 0; i < phoneNumbers.Count; i++)
             {
                 SortByLenght(words[i]);
-                var searchedWords = SearchingWords(words[i], phoneNumbers[i]);
+                var searchedWords = CollectingWords(words[i], phoneNumbers[i]);
                 OutPut(searchedWords);
             }
         }
-        public static List<string> SearchingWords(List<string> words, string number)
-        {
-            bool finded = false;
-
-            List<string> collectedWords = new List<string>();
-            while (!finded)
-            {
-                bool shorted = false;
-                var collected = CollectingWords(words, number);
-
-                if (collected.Count == 0)
-                {
-                    bool changed = false;
-                    if (collectedWords.Count > 0)
-                        words = words.Select(word =>
-                        {
-                            if (word.Length > number.Length)
-                            {
-                                 //Shorting words
-                                var wordL = word.Length - number.Length;
-                                word = word.Substring(wordL);
-                                changed = true;
-                                shorted = true;
-                            }
-                            return word;
-                        }).ToList();
-              
-                    if (!changed)
-                        return null;
-                }
-
-                //If words are shorted 
-                if (shorted)
-                    collected.ForEach(o =>
-                    {
-                        collectedWords[collectedWords.Count - 1] += o;
-                    });
-                else
-                    collectedWords.AddRange(collected);
-
-                int colletedLength = string.Join("", collected).Length;
-
-                if (colletedLength != number.Length && colletedLength > 0)
-                    number = number.Substring(colletedLength);
-                else
-                    if (colletedLength == number.Length)
-                    finded = true;
-            }
-
-            return collectedWords;
-        }
+        /*
+43550 
+3
+hell
+he
+llo
+-1 
+ */
         public static List<string> CollectingWords(List<string> words, string number)
         {
             List<string> collectedWords = new List<string>();
 
+            // yvela sityvas gadavuvlit 
             for (int i = 0; i < words.Count; i++)
             {
-                var word = words[i];
-
-                if (CheckWord(word, number))
+                // shevamowmebt tua shesadzlebeli gamoyenebul iqnas es sityva 
+                if (CheckWord(words[i], number))
                 {
-                    i = -1;
+                    collectedWords.Add(words[i]);
 
-                    int numberLength = number.Length;
-
-                    collectedWords.Add(word);
-
-                    if (word.Length == numberLength)
+                    if (words[i].Length == number.Length)
                         return collectedWords;
 
-                    number = number.Substring(word.Length);
+                    number = number.Substring(words[i].Length);
+
+                    //Tu sityva arsebobs,iqneb kide iarsebos pontshi tavidan vabrunebt
+                    i = -1;
                 }
+
             }
 
-            return collectedWords;
+            var shortedWords = ShortingWords(words, number);
+            for (int i = 0; i < shortedWords.Count; i++)
+            {
+                    if (CheckWord(shortedWords[i], number))
+                    {
+                        collectedWords[collectedWords.Count - 1] += shortedWords[i];
+
+                        if (shortedWords[i].Length == number.Length)
+                            return collectedWords;
+
+                        number = number.Substring(shortedWords[i].Length);
+
+                        //Tu sityva arsebobs,iqneb kide iarsebos pontshi tavidan vabrunebt
+                        i = -1;
+                    }
+            }
+
+            return null;
         }
-        /*
-        43550 
-        3
-        hell
-        he
-        llo
-        -1 
-         */
+
+
         public static bool CheckWord(string word, string number)
         {
             Dictionary<int, string> numbDict = new Dictionary<int, string>()
@@ -120,6 +94,7 @@ namespace ReverseRoot
               {4,"gh" },{5,"kl" },{6,"mn" },
               {7,"prs" },{8,"tuv" },{9,"wxy" },
                          {0,"oqz" }};
+
             if (word.Length > number.Length)
                 return false;
 
@@ -135,10 +110,26 @@ namespace ReverseRoot
 
             return true;
         }
+        public static List<string> ShortingWords(List<string> words, string number)
+        {
+            return words = words.Select(word => ShortingWord(word, number)).ToList();
+        }
+        public static string ShortingWord(string word, string number)
+        {
+            if (word.Length > number.Length)
+            {
+                var wordL = word.Length - number.Length;
+                word = word.Substring(wordL);
+            }
+
+            return word;
+        }
         public static void SortByLenght(List<string> words)
         {
             words.Sort((x, y) => y.Length.CompareTo(x.Length));
         }
+
+        #region I/O
         public static List<List<string>> Input(out List<string> phoneNumbers)
         {
             List<List<string>> words = new List<List<string>>() { };
@@ -243,5 +234,6 @@ namespace ReverseRoot
                 Console.WriteLine("No solution.");
             }
         }
+        #endregion
     }
 }
