@@ -11,10 +11,10 @@ using System.Threading.Channels;
 
 // https://dotnetcoretutorials.com/knapsack-algorithm-in-c/
 // https://www.geeksforgeeks.org/trie-insert-and-search/
-namespace ReverseRoot
+namespace PhoneNumbers
 {
  
-    public class ReverseRoot
+    public class PhoneNumbers
     {
         private static void Main()
         {
@@ -86,7 +86,7 @@ llo
             return null;
         }
 
-
+        
         public static bool CheckWord(string word, string number)
         {
             Dictionary<int, string> numbDict = new Dictionary<int, string>()
